@@ -75,7 +75,7 @@ function App() {
   }, 2000);
 
   return () => clearInterval(interval);
-  }, [jobId, status]);
+  }, [jobId]);
 
   useEffect(() => {
     console.log("Board position updated to:", game);
