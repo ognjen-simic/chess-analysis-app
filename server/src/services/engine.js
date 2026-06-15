@@ -3,7 +3,9 @@ const path = require('path');
 
 class Engine {
   constructor() {
-    this.enginePath = path.resolve(__dirname, '../../bin/engine5.exe'); 
+    this.enginePath = process.platform === 'win32'
+      ? path.resolve(__dirname, '../../bin/engine.exe')
+      : path.resolve(__dirname, '../../bin/engine'); 
     this.process = null;
   }
   init() {
