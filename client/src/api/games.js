@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/games';
+const API_URL = import.meta.env.VITE_API_URL + '/api/games';
 
 export async function submitGame(pgn) {
     const res = await fetch(API_URL, {
