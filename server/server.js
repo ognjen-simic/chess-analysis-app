@@ -7,7 +7,10 @@ const { startWorker } = require('./src/services/queue');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://chess-analysis-app-wheat.vercel.app',
+    methods: ['GET', 'POST'],
+}));
 app.use(express.json());
 app.use('/api/games', gameRoutes);
 
