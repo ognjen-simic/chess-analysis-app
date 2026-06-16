@@ -29,8 +29,17 @@ class Engine {
 
       const startTime = Date.now();
 
-      this.process.stdin.write(`position fen ${fen}\n`);
-      this.process.stdin.write(`go movetime ${moveTimeMs}\n`);
+      if (!this.process || this.process.killed) {
+        throw new Error("Engine process is not running");
+      }
+
+      try {
+        this.process.stdin.write(`position fen ${fen}\n`);
+        this.process.stdin.write(`go movetime ${moveTimeMs}\n`);
+      } catch (err) {
+        console.error("Engine write failed (EPIPE likely):", err);
+        throw err;
+      }
 
       let buffer = '';
 

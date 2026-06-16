@@ -10,7 +10,6 @@ function classifyMove(cpLoss) {
 
 const analyzeGame = async (pgn) => {
   const chess = new Chess();
-
   try {
     chess.loadPgn(pgn);
   } catch (err) {
@@ -26,7 +25,14 @@ const analyzeGame = async (pgn) => {
   chess.reset();
   console.log(`🧠 Starting analysis of ${history.length} moves...`);
 
-  const startEval = await engine.evaluatePosition(chess.fen(), 100);
+  let startEval;
+  try {
+    startEval = await engine.evaluatePosition(chess.fen(), 100);
+  } catch (err) {
+    console.error("Initial engine evaluation failed:", err);
+    engine.quit();
+    return;
+  }
 
   let startScore = startEval.score;
   if (chess.turn() === 'b') {
@@ -76,7 +82,20 @@ const analyzeGame = async (pgn) => {
       break;
     }
 
-    const rawEval = await engine.evaluatePosition(currentFen, 500);
+    // --- FIXED VARIABLE SCOPING HERE ---
+    let rawEval;
+    try {
+      rawEval = await engine.evaluatePosition(currentFen, 500);
+    } catch (err) {
+      console.error("ENGINE FAILED DURING LOOP:", err);
+      // Ensure you close the engine process so it doesn't hang on Render
+      engine.quit(); 
+      
+      // Your DB Fallback code:
+      await db.query("UPDATE games SET status = 'FAILED' WHERE id = $1", [game.id]);
+      await client.query("COMMIT");
+      return;
+    }
 
     let currentScore = rawEval.score;
     if (chess.turn() === 'b') {
