@@ -5,7 +5,7 @@ class Engine {
   constructor() {
     this.enginePath = process.platform === 'win32'
       ? path.resolve(__dirname, '../../bin/engine.exe')
-      : path.resolve(__dirname, '../../bin/engine'); 
+      : path.resolve(__dirname, '../../bin/engine');
     this.process = null;
   }
   init() {
@@ -13,6 +13,13 @@ class Engine {
 
     this.process.on('error', (err) => {
       console.error('❌ Failed to start engine. Is the path correct?', err);
+    });
+    this.process.on('exit', (code, signal) => {
+      console.error('ENGINE EXIT:', code, signal);
+    });
+
+    this.process.stderr.on('data', (data) => {
+      console.error('ENGINE STDERR:', data.toString());
     });
   }
 
@@ -52,16 +59,16 @@ class Engine {
       if (line.startsWith('info') && line.includes('score')) {
         const parts = line.split(' ');
         const scoreIndex = parts.indexOf('score');
-        const type = parts[scoreIndex + 1]; 
+        const type = parts[scoreIndex + 1];
         const value = parseInt(parts[scoreIndex + 2]);
 
         if (type === 'cp') {
-            bestScore = value / 100;
+          bestScore = value / 100;
         } else if (type === 'mate') {
-            bestScore = value > 0 ? 1000 : -1000;
+          bestScore = value > 0 ? 1000 : -1000;
         }
       }
-      
+
       if (line.startsWith('bestmove')) {
         bestMove = line.split(' ')[1].trim();
       }
